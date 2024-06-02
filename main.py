@@ -88,7 +88,5 @@ def scrape_products():
 
     return all_products
 
+scrape_products()
 
-for i, product in enumerate(scrape_products(), 1):
-    print(f"{i}. Name: {product['name']}, Price: {product['price']}, Description: {product['description']}, "
-          f"Category: {product['category']}, Rating: {product['rating']}, Comments Count: {product['comments_count']}")
