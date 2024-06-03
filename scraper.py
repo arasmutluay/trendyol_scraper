@@ -8,6 +8,9 @@ import requests
 from selenium.webdriver.support.wait import WebDriverWait
 
 
+from models import Product, session
+
+
 def scrape_product_details(product_url):
     chrome_options = Options()
     chrome_options.add_argument("--headless")
@@ -19,7 +22,8 @@ def scrape_product_details(product_url):
     print("Name: " + name)
     price = driver.find_element(By.CSS_SELECTOR, "span.prc-dsc").text.strip()
     print("Price: " + price)
-    category = driver.find_element(By.CSS_SELECTOR, "div.product-detail-breadcrumb.full-width").text.strip().split('\n')[-1]
+    category = \
+        driver.find_element(By.CSS_SELECTOR, "div.product-detail-breadcrumb.full-width").text.strip().split('\n')[-1]
     print("Category: " + category)
 
     # we wait 5 sec because rating and comments load after the static HTML is loaded.
@@ -71,6 +75,18 @@ def scrape_products():
         for product in product_containers:
             product_url = product.find("a")["href"]  # Get the URL href for each product,
             product_details = scrape_product_details(product_url)  # and pass it to scrape_product_details
+
+            product_record = Product(
+                name=product_details["name"],
+                category=product_details["category"],
+                price=float(product_details["price"].replace(' TL', '').replace(',', '')),
+                description=product_details["description"],
+                rating=float(product_details["rating"]) if product_details["rating"] else None,
+                comments_count=int(product_details["comments_count"]) if product_details["comments_count"] else None
+            )
+            session.add(product_record)
+            session.commit()
+
             all_products.append(product_details)
 
             if len(all_products) >= 200:
@@ -79,6 +95,3 @@ def scrape_products():
         page_number += 1
 
     return all_products
-
-
-scrape_products()
