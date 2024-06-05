@@ -29,15 +29,29 @@ def scrape_product_details(product_url):
 
     driver.get(f'https://www.trendyol.com{product_url}')
 
+    try:
+        brand = driver.find_element(By.CSS_SELECTOR, "a.product-brand-name-with-link").text.strip()
+    except NoSuchElementException:
+        try:
+            brand = driver.find_element(By.CSS_SELECTOR, "span.product-brand-name-without-link").text.strip()
+        except NoSuchElementException:
+            print("Brand name not found")
+        else:
+            print("Brand:", brand)
+    else:
+        print("Brand:", brand)
+
     name = driver.find_element(By.CSS_SELECTOR, "h1.pr-new-br").text.strip()
     print("Name: " + name)
+
     price = driver.find_element(By.CSS_SELECTOR, "span.prc-dsc").text.strip()
     print("Price: " + price)
+
     category = \
         driver.find_element(By.CSS_SELECTOR, "div.product-detail-breadcrumb.full-width").text.strip().split('\n')[-1]
     print("Category: " + category)
 
-    # we wait 5 sec because rating and comments load after the static HTML is loaded.
+    # we wait 10 sec because rating and comments load after the static HTML is loaded.
     rating = None  # because some products do not have comment or rating
     try:
         WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.CSS_SELECTOR, "p.p-reviews-rate-text")))
@@ -53,6 +67,7 @@ def scrape_product_details(product_url):
     except (NoSuchElementException, TimeoutException):
         pass
     print("Comments Count: ", comments_count)
+    print("\n")
 
     description_items = driver.find_elements(By.CSS_SELECTOR, "div.info-wrapper li")
     description = '\n'.join(item.text.strip() for item in description_items)
@@ -60,6 +75,7 @@ def scrape_product_details(product_url):
     driver.quit()
 
     return {
+        "brand": brand,
         "name": name,
         "category": category,
         "price": price,
@@ -88,9 +104,6 @@ def scrape_products():
             product_url = product.find("a")["href"]  # Get the URL href for each product
             product_details = scrape_product_details(product_url)  # and pass it to scrape_product_details
 
-            #if product_details["comments_count"] is None:
-                #product_details["comments_count"] = 0
-
             all_products.append(product_details)
             unique_products = remove_duplicates(all_products)
 
@@ -101,6 +114,7 @@ def scrape_products():
 
     for product_details in unique_products:
         product_record = Product(
+            brand=product_details["brand"],
             name=product_details["name"],
             category=product_details["category"],
             price=float(product_details["price"].replace(' TL', '').replace(',', '')),
