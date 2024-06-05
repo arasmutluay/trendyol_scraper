@@ -75,7 +75,7 @@ def scrape_products():
     unique_products = []
     page_number = 1
 
-    while len(unique_products) < 50:
+    while len(unique_products) < 30:
         print(f"Scraping Page Number: {page_number}")
 
         url = base_url.format(page_number)
@@ -88,11 +88,13 @@ def scrape_products():
             product_url = product.find("a")["href"]  # Get the URL href for each product
             product_details = scrape_product_details(product_url)  # and pass it to scrape_product_details
 
+            #if product_details["comments_count"] is None:
+                #product_details["comments_count"] = 0
+
             all_products.append(product_details)
             unique_products = remove_duplicates(all_products)
 
-            if len(unique_products) >= 50:
-                print(f'BREAKING AFTER len(unique_products): {len(unique_products)}')
+            if len(unique_products) >= 30:
                 break
 
         page_number += 1
@@ -104,7 +106,7 @@ def scrape_products():
             price=float(product_details["price"].replace(' TL', '').replace(',', '')),
             description=product_details["description"],
             rating=float(product_details["rating"]) if product_details["rating"] else None,
-            comments_count=int(product_details["comments_count"]) if product_details["comments_count"] else None
+            comments_count=int(product_details["comments_count"]) if product_details["comments_count"] else 0
         )
 
         with Session() as session:
