@@ -18,14 +18,28 @@ def print_product_details(product, title):
               f"Comments Count: {product.comments_count} \n")
 
 
+# For returning the product's details for analyze functions. Converts Product to a dictionary
+def get_product_details(product):
+    return {
+        "name": product.name,
+        "price": product.price,
+        "rating": product.rating,
+        "comments_count": product.comments_count
+    }
+
+
 def analyze_most_expensive(session):
     most_expensive_product = session.query(Product).order_by(Product.price.desc()).first()
     print_product_details(most_expensive_product, "Most expensive product: ")
+
+    return get_product_details(most_expensive_product)
 
 
 def analyze_cheapest(session):
     cheapest_product = session.query(Product).order_by(Product.price).first()
     print_product_details(cheapest_product, "Cheapest product: ")
+
+    return cheapest_product
 
 
 def analyze_highest_scored(session):
@@ -34,10 +48,14 @@ def analyze_highest_scored(session):
 
     print_product_details(highest_rated_product, "Highest rated product: ")
 
+    return highest_rated_product
+
 
 def analyze_most_commented(session):
     most_commented_product = session.query(Product).order_by(Product.comments_count.desc()).first()
     print_product_details(most_commented_product, "Most commented product: ")
+
+    return most_commented_product
 
 
 def analyze_average_prices_by_brand(session):
@@ -46,10 +64,15 @@ def analyze_average_prices_by_brand(session):
     for brand, avg_price in average_prices:
         print(f"Brand: {brand} - Average Price: {avg_price:.2f}")
 
+    return average_prices
+
 
 def analyze(session):
-    analyze_most_expensive(session)
-    analyze_cheapest(session)
-    analyze_highest_scored(session)
-    analyze_most_commented(session)
-    analyze_average_prices_by_brand(session)
+    results = {
+        "most_expensive": analyze_most_expensive(session),
+        "cheapest": analyze_cheapest(session),
+        "highest_scored": analyze_highest_scored(session),
+        "most_commented": analyze_most_commented(session),
+        "average_prices_by_brand": analyze_average_prices_by_brand(session)
+    }
+    return results
