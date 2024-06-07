@@ -91,7 +91,7 @@ def scrape_products():
     unique_products = []
     page_number = 1
 
-    while len(unique_products) < 30:
+    while len(unique_products) < 200:
         print(f"Scraping Page Number: {page_number}")
 
         url = base_url.format(page_number)
@@ -107,7 +107,7 @@ def scrape_products():
             all_products.append(product_details)
             unique_products = remove_duplicates(all_products)
 
-            if len(unique_products) >= 30:
+            if len(unique_products) >= 200:
                 break
 
         page_number += 1
