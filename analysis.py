@@ -39,23 +39,32 @@ def analyze_cheapest(session):
     cheapest_product = session.query(Product).order_by(Product.price).first()
     print_product_details(cheapest_product, "Cheapest product: ")
 
-    return cheapest_product
+    return get_product_details(cheapest_product)
 
+
+# def analyze_highest_scored(session):
+#     highest_rating = session.query(func.max(Product.rating)).scalar()
+#     highest_rated_product = session.query(Product).filter(Product.rating == highest_rating).all()
+#
+#     print_product_details(highest_rated_product, "Highest rated product: ")
+#
+#     return highest_rated_product
 
 def analyze_highest_scored(session):
     highest_rating = session.query(func.max(Product.rating)).scalar()
-    highest_rated_product = session.query(Product).filter(Product.rating == highest_rating).all()
+    highest_rated_products = session.query(Product).filter(Product.rating == highest_rating).all()
 
-    print_product_details(highest_rated_product, "Highest rated product: ")
+    for product in highest_rated_products:
+        print_product_details(product, "Highest rated product: ")
 
-    return highest_rated_product
+    return [get_product_details(product) for product in highest_rated_products]
 
 
 def analyze_most_commented(session):
     most_commented_product = session.query(Product).order_by(Product.comments_count.desc()).first()
     print_product_details(most_commented_product, "Most commented product: ")
 
-    return most_commented_product
+    return get_product_details(most_commented_product)
 
 
 def analyze_average_prices_by_brand(session):

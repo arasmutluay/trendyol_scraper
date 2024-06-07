@@ -171,6 +171,7 @@ def plot_average_rating_by_category(session):
 
 
 def create_report(results):
+    # Plot the data
     plot_top_10_most_expensive(session)
     plot_top_10_cheapest(session)
     plot_top_10_most_commented(session)
@@ -178,13 +179,45 @@ def create_report(results):
     plot_number_of_products_per_category(session)
     plot_average_rating_by_category(session)
 
+    # Gather additional results for CSV
+    most_expensive = results["most_expensive"]
+    cheapest = results["cheapest"]
+    most_commented = results["most_commented"]
+    highest_scored = results["highest_scored"][0]
+
     summary_data = {
-        "Metric": ["Most Expensive Product"],
-        "Product Name": [results["most_expensive"]["name"]],
-        "Price": [results["most_expensive"]["price"]],
-        "Rating": [results["most_expensive"]["rating"]],
-        "Comments Count": [results["most_expensive"]["comments_count"]]
+        "Metric": [
+            "Most Expensive Product",
+            "Cheapest Product",
+            "Most Commented Product",
+            "Highest Rated Product"
+        ],
+        "Product Name": [
+            most_expensive["name"],
+            cheapest["name"],
+            most_commented["name"],
+            highest_scored["name"]
+        ],
+        "Price": [
+            most_expensive["price"],
+            cheapest["price"],
+            most_commented["price"],
+            highest_scored["price"]
+        ],
+        "Rating": [
+            most_expensive["rating"],
+            cheapest["rating"],
+            most_commented["rating"],
+            highest_scored["rating"]
+        ],
+        "Comments Count": [
+            most_expensive["comments_count"],
+            cheapest["comments_count"],
+            most_commented["comments_count"],
+            highest_scored["comments_count"]
+        ]
     }
     summary_df = pd.DataFrame(summary_data)
 
+    # Save the summary DataFrame as a CSV file
     summary_df.to_csv('./report/report_summary.csv', index=False)
