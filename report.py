@@ -119,11 +119,64 @@ def plot_average_price_by_brand(session):
     plt.show()
 
 
+def plot_number_of_products_per_category(session):
+    category_counts = session.query(Product.category, func.count(Product.id)).group_by(Product.category).all()
+    categories = [item[0] for item in category_counts]
+    counts = [item[1] for item in category_counts]
+    wrapped_categories = ['\n'.join(textwrap.wrap(category, width=30)) for category in categories]
+
+    data = pd.DataFrame({
+        'Category': wrapped_categories,
+        'Count': counts
+    }).sort_values(by='Count', ascending=False)
+
+    plt.figure(figsize=(15, 30))
+
+    bar_plot = sns.barplot(x='Count', y='Category', data=data, palette='dark:skyblue', hue='Category')
+
+    for index, value in enumerate(data['Count']):
+        bar_plot.text(value, index, f'{value}', color='black', ha="left", va='center')
+
+    plt.xlabel('Number of Products')
+    plt.ylabel('Category')
+    plt.title('Number of Products per Category')
+    plt.tight_layout()
+    plt.savefig('./report/plots/products_per_category.png')
+    plt.show()
+
+
+def plot_average_rating_by_category(session):
+    avg_ratings_by_category = session.query(Product.category, func.avg(Product.rating)).group_by(Product.category).all()
+    categories = [item[0] for item in avg_ratings_by_category]
+    avg_ratings = [item[1] for item in avg_ratings_by_category]
+    wrapped_categories = ['\n'.join(textwrap.wrap(category, width=30)) for category in categories]
+
+    data = pd.DataFrame({
+        'Category': wrapped_categories,
+        'Average Rating': avg_ratings
+    }).sort_values(by='Average Rating', ascending=False)
+
+    plt.figure(figsize=(30, 30))
+
+    bar_plot = sns.barplot(x='Average Rating', y='Category', data=data, palette='dark:skyblue', hue='Category')
+
+    for index, value in enumerate(data['Average Rating']):
+        bar_plot.text(value, index, f'{value:.2f}', color='black', ha="left", va='center')
+
+    plt.xlabel('Average Rating')
+    plt.ylabel('Category')
+    plt.title('Average Rating by Category')
+    plt.tight_layout()
+    plt.show()
+
+
 def create_report(results):
     plot_top_10_most_expensive(session)
     plot_top_10_cheapest(session)
     plot_top_10_most_commented(session)
     plot_average_price_by_brand(session)
+    plot_number_of_products_per_category(session)
+    plot_average_rating_by_category(session)
 
     summary_data = {
         "Metric": ["Most Expensive Product"],
