@@ -24,11 +24,12 @@ def remove_duplicates(products):
 
 def scrape_product_details(product_url):
     chrome_options = Options()
-    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--headless")  # For using selenium without opening browser
     driver = webdriver.Chrome(options=chrome_options)
 
-    driver.get(f'https://www.trendyol.com{product_url}')
+    driver.get(f'https://www.trendyol.com{product_url}')  # Opening the products page
 
+    # This is for scraping the brand name
     try:
         brand = driver.find_element(By.CSS_SELECTOR, "a.product-brand-name-with-link").text.strip()
     except NoSuchElementException:
@@ -41,12 +42,15 @@ def scrape_product_details(product_url):
     else:
         print("Brand:", brand)
 
+    # Scrape product name
     name = driver.find_element(By.CSS_SELECTOR, "h1.pr-new-br").text.strip()
     print("Name: " + name)
 
+    # Scrape price
     price = driver.find_element(By.CSS_SELECTOR, "span.prc-dsc").text.strip()
     print("Price: " + price)
 
+    # Scrape product category
     category = \
         driver.find_element(By.CSS_SELECTOR, "div.product-detail-breadcrumb.full-width").text.strip().split('\n')[-1]
     print("Category: " + category)
@@ -69,11 +73,13 @@ def scrape_product_details(product_url):
     print("Comments Count: ", comments_count)
     print("\n")
 
+    # Scrape product description
     description_items = driver.find_elements(By.CSS_SELECTOR, "div.info-wrapper li")
     description = '\n'.join(item.text.strip() for item in description_items)
 
     driver.quit()
 
+    # return all info as a dict
     return {
         "brand": brand,
         "name": name,
@@ -86,7 +92,7 @@ def scrape_product_details(product_url):
 
 
 def scrape_products():
-    base_url = "https://www.trendyol.com/gida-ve-icecek-x-c103946?pi={}"
+    base_url = "https://www.trendyol.com/gida-ve-icecek-x-c103946?pi={}"  # The base URL to be scraped
     all_products = []
     unique_products = []
     page_number = 1
@@ -94,12 +100,15 @@ def scrape_products():
     while len(unique_products) < 200:
         print(f"Scraping Page Number: {page_number}")
 
+        # For getting the pages content
         url = base_url.format(page_number)
         result = requests.get(url)
         doc = BeautifulSoup(result.content, "html.parser")
 
+        # Find all the product containers on the (page_number)
         product_containers = doc.find_all("div", class_="p-card-chldrn-cntnr card-border")
 
+        # Scrape the details of each product inside the container
         for product in product_containers:
             product_url = product.find("a")["href"]  # Get the URL href for each product
             product_details = scrape_product_details(product_url)  # and pass it to scrape_product_details
@@ -112,6 +121,7 @@ def scrape_products():
 
         page_number += 1
 
+    # Save unique products to the database
     for product_details in unique_products:
         product_record = Product(
             brand=product_details["brand"],

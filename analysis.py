@@ -42,14 +42,6 @@ def analyze_cheapest(session):
     return get_product_details(cheapest_product)
 
 
-# def analyze_highest_scored(session):
-#     highest_rating = session.query(func.max(Product.rating)).scalar()
-#     highest_rated_product = session.query(Product).filter(Product.rating == highest_rating).all()
-#
-#     print_product_details(highest_rated_product, "Highest rated product: ")
-#
-#     return highest_rated_product
-
 def analyze_highest_scored(session):
     highest_rating = session.query(func.max(Product.rating)).scalar()
     highest_rated_products = session.query(Product).filter(Product.rating == highest_rating).all()

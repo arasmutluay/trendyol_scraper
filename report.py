@@ -6,17 +6,18 @@ import seaborn as sns
 from sqlalchemy import func
 
 from models import session, Product
-from analysis import analyze
 
 
 # PLOT FUNCTIONS
 
 def plot_top_10_most_expensive(session):
+    # Query top 10 expensive products
     top_10_expensive = session.query(Product).order_by(Product.price.desc()).limit(10).all()
     names = [product.name for product in top_10_expensive]
     prices = [product.price for product in top_10_expensive]
     wrapped_names = ['\n'.join(textwrap.wrap(name, width=30)) for name in names]
 
+    # Create df for plot
     data = pd.DataFrame({
         'Product': wrapped_names,
         'Price': prices
@@ -107,13 +108,12 @@ def plot_average_price_by_brand(session):
 
     bar_plot = sns.barplot(x='Average Price', y='Brand', data=data, palette='coolwarm_r', hue='Brand')
 
-    # enumerate over average price on DF (since we sorted it there)
     for index, value in enumerate(data['Average Price']):
         bar_plot.text(value, index, f'{value:.2f} TL', color='black', ha="left", va='center')
 
-    plt.xlabel('Average Price (TL)')
-    plt.ylabel('Brand')
-    plt.title('Average Price by Brand')
+    plt.xlabel('Average Price (TL)', fontsize=40)
+    plt.ylabel('Brand', fontsize=40)
+    plt.title('Average Price by Brand', fontsize=40)
     plt.tight_layout()
     plt.savefig('./report/plots/average_price_by_brand.png')
     plt.show()
@@ -137,9 +137,9 @@ def plot_number_of_products_per_category(session):
     for index, value in enumerate(data['Count']):
         bar_plot.text(value, index, f'{value}', color='black', ha="left", va='center')
 
-    plt.xlabel('Number of Products')
-    plt.ylabel('Category')
-    plt.title('Number of Products per Category')
+    plt.xlabel('Number of Products', fontsize=40)
+    plt.ylabel('Category', fontsize=40)
+    plt.title('Number of Products per Category', fontsize=40)
     plt.tight_layout()
     plt.savefig('./report/plots/products_per_category.png')
     plt.show()
@@ -163,9 +163,9 @@ def plot_average_rating_by_category(session):
     for index, value in enumerate(data['Average Rating']):
         bar_plot.text(value, index, f'{value:.2f}', color='black', ha="left", va='center')
 
-    plt.xlabel('Average Rating')
-    plt.ylabel('Category')
-    plt.title('Average Rating by Category')
+    plt.xlabel('Average Rating', fontsize=40)
+    plt.ylabel('Category', fontsize=40)
+    plt.title('Average Rating by Category', fontsize=40)
     plt.tight_layout()
     plt.show()
 
@@ -179,7 +179,7 @@ def create_report(results):
     plot_number_of_products_per_category(session)
     plot_average_rating_by_category(session)
 
-    # Gather additional results for CSV
+    # results for creating a df
     most_expensive = results["most_expensive"]
     cheapest = results["cheapest"]
     most_commented = results["most_commented"]
@@ -217,7 +217,8 @@ def create_report(results):
             highest_scored["comments_count"]
         ]
     }
+    # summary dict to DF
     summary_df = pd.DataFrame(summary_data)
 
-    # Save the summary DataFrame as a CSV file
+    # Save the dataframe to a CSV file
     summary_df.to_csv('./report/report_summary.csv', index=False)
